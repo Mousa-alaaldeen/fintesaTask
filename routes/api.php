@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Api\userController;
+use App\Http\Controllers\Api\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +24,6 @@ Route::post('/register', [ApiController::class, 'register']);
 
 Route::post('/login', [ApiController::class, 'login']);
 
-Route::middleware('auth:api', 'role:user')->get('user/me', [ApiController::class, 'me']);
+Route::middleware('auth:api', 'role:user')->get('user/me', [userController::class, 'me']);
 
-Route::middleware(['auth:api', 'role:admin'])->get('/admin', [ApiController::class, 'admin']);
+Route::middleware(['auth:api', 'role:admin'])->get('/admin', [AdminController::class, 'admin']);

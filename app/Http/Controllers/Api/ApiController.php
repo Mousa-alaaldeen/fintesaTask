@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -10,25 +9,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ApiController extends Controller
 {
-
-    private function sendResponse($status, $message, $data = null, $statusCode = 200)
-    {
-        return response()->json([
-            'status' => $status,
-            'message' => $message,
-            'data' => $data,
-        ], $statusCode);
-    }
-
-    private function sendError($message, $error = null, $statusCode = 500)
-    {
-        return response()->json([
-            'status' => false,
-            'message' => $message,
-            'error' => $error,
-        ], $statusCode);
-    }
-
     public function register(Request $request)
     {
         try {
@@ -54,16 +34,22 @@ class ApiController extends Controller
     
             $token = JWTAuth::fromUser($user);
     
-            return $this->sendResponse(true, 'User registered successfully', [
-                'user' => $user,
-                'token' => $token,
+            return response()->json([
+                'status' => true,
+                'message' => 'User registered successfully',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ]
             ], 201);
         } catch (\Exception $e) {
-            return $this->sendError('Registration failed', $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Registration failed',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
-    
-
   
     public function login(Request $request)
     {
@@ -76,44 +62,33 @@ class ApiController extends Controller
             $credentials = $request->only('email', 'password');
 
             if (!Auth::attempt($credentials)) {
-                return $this->sendResponse(false, 'Invalid credentials', null, 401);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials',
+                ], 401);
             }
 
             $user = Auth::user();
             $token = JWTAuth::fromUser($user);
 
-            return $this->sendResponse(true, 'Login successful', [
-                'user' => $user,
-                'token' => $token,
+            return response()->json([
+                'status' => true,
+                'message' => 'Login successful',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ]
             ]);
         } catch (\Exception $e) {
-            return $this->sendError('Login failed', $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Login failed',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    public function me()
-    {
-        try {
-            $user = auth('api')->user();
+   
 
-            if (!$user) {
-                return $this->sendResponse(false, 'User not authenticated', null, 401);
-            }
 
-            return $this->sendResponse(true, 'User profile fetched successfully', $user);
-        } catch (\Exception $e) {
-            return $this->sendError('Failed to fetch profile', $e->getMessage());
-        }
-    }
-
-    public function admin()
-    {
-        $user = auth('api')->user();
-
-        if (!$user || $user->role !== 'admin') {
-            return $this->sendResponse(false, 'Unauthorized', null, 401);
-        }
-
-        return $this->sendResponse(true, 'Welcome admin',$user);
-    }
 }
