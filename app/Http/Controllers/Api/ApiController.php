@@ -108,12 +108,12 @@ class ApiController extends Controller
 
     public function admin()
     {
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         if (!$user || $user->role !== 'admin') {
             return $this->sendResponse(false, 'Unauthorized', null, 401);
         }
 
-        return $this->sendResponse(true, 'Welcome admin');
+        return $this->sendResponse(true, 'Welcome admin',$user);
     }
 }
